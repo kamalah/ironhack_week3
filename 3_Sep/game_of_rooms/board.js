@@ -52,9 +52,10 @@ Board.prototype.move = function(move) {
 
 Board.prototype.play_game = function(){
 	options = {prompt: "\n>"};
+	var self = this;
 	if (!this.exit) {
 		read(options, function(err, move) {
-			my_board.move(move);
+			self.move(move);
 			});
 	}
 
