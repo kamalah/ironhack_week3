@@ -1,0 +1,17 @@
+.box{
+	border:2px solid #ddd;
+	height: 100px
+
+}
+
+body {
+  position: relative;
+}
+
+.container{
+	display: flex;
+	height: 100%;
+	align-items:center;
+	justify-content:center;
+	flex-direction:column;
+}
