@@ -20,7 +20,11 @@ Space.prototype.get_exits = function() {
 	}
 
 	return exit_string;
-}
+};
+
+Space.prototype.checkRoomForItem = function (item) {
+	return (this.room_items.indexOf(item) > -1);
+};
 		
 Space.prototype.show_room = function() {
 	console.log(this.description);
@@ -28,6 +32,15 @@ Space.prototype.show_room = function() {
 		if (this.room_items.length > 0) {
 			console.log("There is/are: " + this.room_items.join(", "));
 		} 
-}
+};
+
+Space.prototype.removeItem = function(item) {
+	var item_index = this.room_items.indexOf(item);
+	this.room_items.splice(item_index,1);
+};
+
+Space.prototype.addItem = function(item) {
+	this.room_items.push(item);
+};
 
 module.exports = Space;

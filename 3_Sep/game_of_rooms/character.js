@@ -1,65 +1,31 @@
-var read = require('read');
-
-var Character  = function() {
+var Character  = function(name) {
+	this.name = name;
 	this.location = 0;
 	this.inventory = [];
 };
 
-
-var Board = function(rooms) {
-	this.board = rooms;
-	this.player = new Character();
-	this.exit = false;
-}
-
-Board.prototype.move = function(move) {
-	move = move.toUpperCase();
-	console.log(move);
-	if (move === 'E' || move === 'W' || move === 'N' || move === 'S'){
-		this.move_room(move);
-	}	else if (move === "CRY") {
-			console.log("Don't cry, the bears will come");
-	}	else if (move === "EXIT") {
-		this.exit = true;
-	}
-	else {
-		console.log("Mande?");
-	}
-	this.play_game();
-};
-
-Board.prototype.play_game = function(){
-	options = {prompt: "Enter your move?\n>"};
-	if (!this.exit) {
-		read(options, function(err, move) {
-			my_board.move(move);
+Character.prototype.show_inventory = function() {
+	if (this.inventory.length > 0) {
+			console.log("You have: ");
+			this.inventory.forEach(function(item){
+				console.log("- " + item)
 			});
+	}	else {
+			console.log("You do not have any items.");
 	}
-
-	else {
-		console.log("Game Over");
-	}
-
-
 }
-Board.prototype.move_room = function(move) {
 
-	if (this.board[this.player.location].directions[move] === 1) {
-			switch (move) {
-				case 'E':
-					this.player.location -=1; break;
-				case 'W':
-					this.player.location +=1; break;
-				case 'S':
-					this.player.location +=3; break;
-				case 'N':
-					this.player.location -=3; break;
-			}
-			this.board[this.player.location].show_room();			
-		}
-		else{
-			console.log("Invalid move");
-		}
+Character.prototype.addItem = function(item) {
+	this.inventory.push(item);
 }
-	
-module.exports = [Character, Board];	
+
+Character.prototype.dropItem = function (item) {
+	var item_index = this.inventory.indexOf(item);
+	this.inventory.splice(item_index,1);
+}
+
+Character.prototype.checkItem = function (item) {
+	return (this.inventory.indexOf(item) >-1);
+}
+
+module.exports = Character;	

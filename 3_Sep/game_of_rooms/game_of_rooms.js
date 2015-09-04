@@ -1,7 +1,6 @@
 var read = require('read');
-var import_class = require('./character.js');
-var Character = import_class[0];
-var Board = import_class[1];
+
+var Board = require('./board.js');
 var Space = require('./spaces.js');
 
 room_1 = new Space("You are in a sunny room, there are two exits.", [0,1,0,1], ["SWORD"]);
