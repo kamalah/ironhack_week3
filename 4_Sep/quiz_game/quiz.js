@@ -7,51 +7,32 @@ var Quiz = function(questions) {
 	this.bonus = -1;
 };
 
-Quiz.prototype.checkAnswer = function(answer) {
-	if (this.quiz_array[this.location].answer === answer) {
+Quiz.prototype.checkAnswer = function(answer, index) {
+	if (this.quiz_array[index].answer === answer) {
 		console.log("Correct!");
-		this.total += this.quiz_array[this.location].value;
-		this.location ++;
+		return this.quiz_array[index].value;
 	} else {
 		console.log("Incorrect!");
-		this.total -= this.quiz_array[this.location].value;
+		return  (-1 * this.quiz_array[index].value);
 	}
-
-	if (this.location < this.quiz_array.length) {
-		this.getAnswer();	
-	} else {
-		
-		console.log("\nYour final score is: " + this.total);
-		console.log("End of Quiz!");
-	}
-	
 };
 
-Quiz.prototype.getAnswer = function() {
-	console.log("Your current score is: " + this.total);
-	if (this.location == this.bonus) {
-		console.log("***** Bonus Question worth: " + this.quiz_array[this.location].value +
+Quiz.prototype.showQuestion = function(index) {
+		if (index == this.bonus) {
+		console.log("***** Bonus Question worth: " + this.quiz_array[index].value +
 			" points ******");
-	}
-	options = {prompt: this.quiz_array[this.location].question};
-	
-	var self = this;
-	read(options, function(err, answer) {
-		self.checkAnswer(answer);
-	});
+		}
 
- };
+		console.log(this.quiz_array[index].question);
+};
 
 Quiz.prototype.determineBonus = function() {
 	this.bonus = Math.floor(Math.random()* this.quiz_array.length);
 	this.quiz_array[this.bonus].value  *= 2;
 };
 
-Quiz.prototype.startQuiz = function (user) {
-	this.location = user.location;
-	this.total = user.total;
-	this.determineBonus();
-	this.getAnswer();
+Quiz.prototype.endOfQuiz = function(index) {
+	return (index === this.quiz_array.length);
 }
 
 module.exports = Quiz;

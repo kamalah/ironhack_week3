@@ -1,5 +1,6 @@
 var Quiz = require("./quiz.js");
 var read = require('read');
+var fs = require('fs');
 
 var User = function(name){
 	this.name = name;
@@ -16,6 +17,12 @@ var Question = function(question, answer, value) {
 var Proctor = function() {
 	this.quiz = [];
 	this.testers = [];
+	this.current_user = 0;
+};
+
+Proctor.prototype.quizTime = function() {
+	this.createQuiz();
+	this.getSavedData();
 };
 
 Proctor.prototype.createQuiz = function() {
@@ -24,14 +31,21 @@ Proctor.prototype.createQuiz = function() {
 	var question3 = new Question("Who is the president of the USA?", "Barack Obama", 2);
 	var question4 = new Question("How many fingers are on the human hand?", "5", 3);
 	this.quiz = new Quiz([question1, question2, question3, question4]);
+	this.quiz.determineBonus();
 };
 
-Proctor.prototype.quizTime = function() {
-	this.createQuiz();
-	this.testers.push(new User("Feo Grande"));
-	this.testers[0].location = 2;
-	this.checkUser();
-};
+Proctor.prototype.getSavedData = function() {
+	var self = this;
+	fs.readFile("./user_data.json", 'utf8', function(err, file) {
+		if (err) {
+        	throw err;
+    	} else {
+    		self.testers = JSON.parse(file);
+    		self.showLeaders();
+    		self.checkUser();
+		}
+	});
+}; 
 
 Proctor.prototype.checkUser = function() {
 	var self = this;
@@ -50,8 +64,9 @@ Proctor.prototype.addNewUser = function() {
 	options = {prompt: "Enter Name: "};
 	
 	read(options, function(err, name) {
-		self.testers.push(new User(name));
-		self.startQuiz(self.testers.length-1);  		
+		self.testers.unshift(new User(name));
+		this.current_user = 0;
+		self.getAnswer();  		
 	});
 
 	
@@ -63,17 +78,70 @@ Proctor.prototype.findUser = function() {
 
 	options = {prompt: "Enter Name: "};
 	read(options, function(err, name) {
-		var current_user = user_names.indexOf(name);
+		this.current_user = user_names.indexOf(name);
 		if (current_user > -1) {
-			self.startQuiz(current_user);
+			self.getAnswer();
 		} else {
 			self.addNewUser();
 		}
 	});
 };
 
-Proctor.prototype.startQuiz = function(user) {
-	this.quiz.startQuiz(this.testers[user]);
+Proctor.prototype.getAnswer = function() {
+	console.log("Your current score is: " + this.testers[current_user].total);
+	if (this.checkCurrentUserLeader()) {
+		console.log("You are the current leader.")
+	}
+	this.quiz.showQuestion(this.testers[current_user].location);
+
+	options = {prompt: ""};
+
+	var self = this;
+	read(options, function(err, answer) {
+		self.checkAnswer(answer);
+	});
+
+ };
+
+ Proctor.prototype.checkAnswer = function(answer) {
+ 	if (answer === "save") {
+ 		this.saveGame();
+ 	} else {
+ 		var score = this.quiz.checkAnswer(answer,this.testers[current_user].location);
+ 		this.testers[current_user].total += score;
+ 		if (score > 0) {
+ 			this.testers[current_user].location += 1;
+ 		}
+
+ 		if (!this.quiz.endOfQuiz(this.testers[current_user].location)) {
+			this.getAnswer();	
+		} else {
+				console.log("\nYour final score is: " + this.testers[current_user].total);
+				console.log("End of Quiz!");
+		}
+ 	}
+ };
+Proctor.prototype.saveGame = function() {
+	var jsonString = JSON.stringify(this.testers);
+	fs.writeFile("./user_data.json", jsonString, function(err) {
+    	if(err) {
+        	return console.log(err);
+    	}
+    	console.log("The quiz statas was saved!");
+		});
+};
+
+Proctor.prototype.showLeaders = function() {
+	this.testers.forEach(function (user) {
+		console.log(user.name + ".............." + user.total)
+	});
+};
+
+Proctor.prototype.checkCurrentUserLeader = function() {
+	var current_user_total = this.testers[current_user].total;
+	var winners = this.testers.filter(function(user) {
+		return current_user_total < user.total;});
+	return winners.length == 0;
 };
 
 module.exports = Proctor;
